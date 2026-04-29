@@ -70,4 +70,20 @@ SET
   spot_price_usd = EXCLUDED.spot_price_usd,
   updated_at = NOW();
 
+ALTER TABLE deposits 
+ Add COLUMN IF NOT EXISTS deposit_number VARCHAR(30) UNIQUE;
+
+ CREATE TABLE IF NOT EXISTS withdrawals (
+  id BIGSERIAL PRIMARY KEY,
+  customer_id BIGINT NOT NULL REFERENCES customers(id) ON DELETE RESTRICT,
+  metal_id SMALLINT NOT NULL REFERENCES metals(id) ON DELETE RESTRICT,
+  deposit_id BIGINT REFERENCES deposits(id) ON DELETE SET NULL,
+  bar_id BIGINT REFERENCES bars(id) ON DELETE SET NULL,
+  storage_type VARCHAR(20) NOT NULL CHECK (storage_type IN ('allocated', 'unallocated')),
+  quantity_oz NUMERIC(18,6) NOT NULL CHECK (quantity_oz > 0),
+  withdrawn_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+
   COMMIT;

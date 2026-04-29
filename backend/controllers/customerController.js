@@ -1,7 +1,7 @@
 const db = require('../db/index');
 
 async function getAllCustomers(req ,res) {
-    const result = await db.query('SELECT id,name,email,type FROM customers ORDER BY id');
+    const result = await db.query('SELECT id,full_name,email,type FROM customers ORDER BY id');
     res.json({customers: result.rows});
     
 }
@@ -15,11 +15,12 @@ async function createCustomer(req, res){
     if(type !== 'individual' && type !== 'business'){
         return res.status(400).json({error:'Invalid customer type'});
     }
-    const result = await db.query(`INSERT INTO customers(ful_name,email,type)
-        Values($1,$2,$3)
-        RETURNING id,full_name,email,type,created_at`
-        [full_name,email,type]
-        );
+    const result = await db.query(
+        `INSERT INTO customers (full_name, email, type)
+         VALUES ($1, $2, $3)
+         RETURNING id, full_name, email, type, created_at`,
+        [full_name, email, type]  
+      );
     res.status(201).json({customer: result.rows[0]});    
 }
 
@@ -40,7 +41,7 @@ async function getCustomerAccount(req,res) {
         [id]
       );
       res.json({
-        customer: result.rows[0],
+        customer: customerResult.rows[0],
         deposits: depositsResult.rows,
       });
    
