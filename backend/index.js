@@ -3,6 +3,10 @@ const express = require('express');
 const cors = require('cors');
 const metalRoutes = require('./routes/metal');
 const customerRoutes = require('./routes/customer');
+const depositRoutes = require('./routes/desposits');   
+const withdrawalRoutes = require('./routes/withdrawals');
+const accountRoutes = require('./routes/accounts');
+
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -13,7 +17,7 @@ app.use('/api/metals', metalRoutes);
 app.use('/api/customers', customerRoutes);
 app.use('/api/deposits', depositRoutes);
 app.use('/api/withdrawals', withdrawalRoutes);
-
+app.use('/api/accounts', accountRoutes);
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
   });
