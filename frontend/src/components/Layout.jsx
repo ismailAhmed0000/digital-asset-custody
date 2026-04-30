@@ -1,14 +1,14 @@
 import {Outlet} from 'react-router-dom';
-import Navbar from './Navbar';
+import Navbar from './navbar';
 import MetalPriceStrip from './MetalPriceStrip';
 
 
 export default function Layout() {
     return (
-        <div className="min-h-screen bg-[#0f1117] flex flex-col">
+        <div className="min-h-screen bg-white flex flex-col">
           <Navbar />
           <MetalPriceStrip />
-          <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8">
+          <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-8 bg-white">
             <Outlet />
           </main>
         </div>
