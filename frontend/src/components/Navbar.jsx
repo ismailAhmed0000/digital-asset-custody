@@ -4,8 +4,8 @@ import {NavLink} from 'react-router-dom';
 const links = [
     {to: '/', label: 'Dashboard'},
     {to: '/customers', label: 'Customers'},
-    {to:'/deposits/new', label: 'New Deposit'},
-    {to:'/withdrawals/new', label: 'New Withdrawal'},
+    {to:'/deposits/new', label: 'New Depositds'},
+    {to:'/withdrawals/new', label: 'New Withdrawals'},
 ];
 
 export default function Navbar() {
