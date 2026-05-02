@@ -1,7 +1,10 @@
 const db = require('../db/index');
+const { toDbType, toApiType, apiTypeCaseSql } = require('../lib/customerTypeMap');
 
 async function getAllCustomers(req ,res) {
-    const result = await db.query('SELECT id,full_name,email,type FROM customers ORDER BY id');
+    const result = await db.query(
+        `SELECT id, name AS full_name, email, ${apiTypeCaseSql()} FROM customers ORDER BY id`
+    );
     res.json({customers: result.rows});
     
 }
@@ -12,21 +15,31 @@ async function createCustomer(req, res){
     if(!full_name || !email || !type){
         return res.status(400).json({error:'Missing required fields'});
     }
-    if(type !== 'individual' && type !== 'business'){
-        return res.status(400).json({error:'Invalid customer type'});
+    if (type !== 'retail' && type !== 'institutional') {
+        return res.status(400).json({ error: 'Invalid customer type' });
+    }
+    const dbType = toDbType(type);
+    if (!dbType) {
+        return res.status(400).json({ error: 'Invalid customer type' });
     }
     const result = await db.query(
-        `INSERT INTO customers (full_name, email, type)
+        `INSERT INTO customers (name, email, type)
          VALUES ($1, $2, $3)
-         RETURNING id, full_name, email, type, created_at`,
-        [full_name, email, type]  
-      );
-    res.status(201).json({customer: result.rows[0]});    
+         RETURNING id, name AS full_name, email, type, created_at`,
+        [full_name, email, dbType]
+    );
+    const row = result.rows[0];
+    res.status(201).json({
+        customer: { ...row, type: toApiType(row.type) },
+    });
 }
 
 async function getCustomerAccount(req,res) {
     const {id} =req.params;
-    const customerResult = await db.query('SELECT id,name,email,type FROM customers WHERE id = $1', [id]);
+    const customerResult = await db.query(
+        `SELECT id, name AS full_name, email, ${apiTypeCaseSql()} FROM customers WHERE id = $1`,
+        [id]
+    );
 
     if(customerResult.rows.length === 0){
         return res.status(404).json({error:'Customer not found'});

@@ -1,10 +1,11 @@
 BEGIN;
 
+-- Column is `name` (legacy); API returns it as `full_name` via SQL alias.
 CREATE TABLE IF NOT EXISTS customers (
     id BIGSERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
-    type VARCHAR(20) NOT NULL CHECK (type IN ('individual', 'business')),
+    type VARCHAR(20) NOT NULL CHECK (type IN ('retail', 'institutional')),
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
