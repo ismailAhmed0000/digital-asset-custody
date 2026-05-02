@@ -15,28 +15,28 @@ async function getPortfolio(req, res) {
   }
 
   // ── Unallocated holdings per metal ──────────────────────────
-  // Net oz = total deposited oz - total withdrawn oz, then × spot price
+  // Net kg = total deposited kg - total withdrawn kg, then × spot price
   const unallocatedResult = await db.query(
     `SELECT
        m.id          AS metal_id,
        m.code        AS metal_code,
        m.name        AS metal_name,
        m.spot_price_usd,
-       COALESCE(SUM(d.quantity_oz), 0) AS total_deposited_oz,
+       COALESCE(SUM(d.quantity_kg), 0) AS total_deposited_kg,
        COALESCE((
-         SELECT SUM(w.quantity_oz)
+         SELECT SUM(w.quantity_kg)
          FROM withdrawals w
          WHERE w.customer_id = $1
            AND w.metal_id = m.id
            AND w.storage_type = 'unallocated'
-       ), 0) AS total_withdrawn_oz
+       ), 0) AS total_withdrawn_kg
      FROM metals m
      LEFT JOIN deposits d
        ON d.metal_id = m.id
        AND d.customer_id = $1
        AND d.storage_type = 'unallocated'
      GROUP BY m.id, m.code, m.name, m.spot_price_usd
-     HAVING COALESCE(SUM(d.quantity_oz), 0) > 0`,
+     HAVING COALESCE(SUM(d.quantity_kg), 0) > 0`,
     [id]
   );
 
@@ -49,7 +49,7 @@ async function getPortfolio(req, res) {
        m.spot_price_usd,
        b.id          AS bar_id,
        b.serial_number,
-       b.fine_weight_oz,
+       b.fine_weight_kg,
        b.purity,
        b.status      AS bar_status
      FROM deposits d
@@ -68,23 +68,23 @@ async function getPortfolio(req, res) {
   const poolTotalsResult = await db.query(
     `SELECT
        metal_id,
-       COALESCE(SUM(quantity_oz), 0) AS pool_total_oz
+       COALESCE(SUM(quantity_kg), 0) AS pool_total_kg
      FROM deposits
      WHERE storage_type = 'unallocated'
      GROUP BY metal_id`
   );
   const poolTotals = {};
   for (const row of poolTotalsResult.rows) {
-    poolTotals[row.metal_id] = parseFloat(row.pool_total_oz);
+    poolTotals[row.metal_id] = parseFloat(row.pool_total_kg);
   }
 
   // ── Shape unallocated response ───────────────────────────────
   const unallocated = unallocatedResult.rows.map((row) => {
-    const net_oz = parseFloat(row.total_deposited_oz) - parseFloat(row.total_withdrawn_oz);
-    const usd_value = net_oz * parseFloat(row.spot_price_usd);
+    const net_kg = parseFloat(row.total_deposited_kg) - parseFloat(row.total_withdrawn_kg);
+    const usd_value = net_kg * parseFloat(row.spot_price_usd);
     const pool_total = poolTotals[row.metal_id] || 0;
     const pool_percentage = pool_total > 0
-      ? ((net_oz / pool_total) * 100).toFixed(2)
+      ? ((net_kg / pool_total) * 100).toFixed(2)
       : '0.00';
 
     return {
@@ -92,7 +92,7 @@ async function getPortfolio(req, res) {
       metal_code: row.metal_code,
       metal_name: row.metal_name,
       spot_price_usd: parseFloat(row.spot_price_usd),
-      net_oz,
+      net_kg,
       usd_value: parseFloat(usd_value.toFixed(2)),
       pool_percentage: `${pool_percentage}%`,
     };
@@ -108,7 +108,7 @@ async function getPortfolio(req, res) {
         metal_name: row.metal_name,
         spot_price_usd: parseFloat(row.spot_price_usd),
         bars: [],
-        total_fine_oz: 0,
+        total_fine_kg: 0,
         usd_value: 0,
       };
     }
@@ -116,18 +116,18 @@ async function getPortfolio(req, res) {
     entry.bars.push({
       bar_id: row.bar_id,
       serial_number: row.serial_number,
-      fine_weight_oz: parseFloat(row.fine_weight_oz),
+      fine_weight_kg: parseFloat(row.fine_weight_kg),
       purity: parseFloat(row.purity),
       status: row.bar_status,
     });
-    entry.total_fine_oz += parseFloat(row.fine_weight_oz);
+    entry.total_fine_kg += parseFloat(row.fine_weight_kg);
   }
 
   // Compute USD value per metal group after totalling bars
   const allocated = Object.values(allocatedByMetal).map((entry) => ({
     ...entry,
-    total_fine_oz: parseFloat(entry.total_fine_oz.toFixed(6)),
-    usd_value: parseFloat((entry.total_fine_oz * entry.spot_price_usd).toFixed(2)),
+    total_fine_kg: parseFloat(entry.total_fine_kg.toFixed(6)),
+    usd_value: parseFloat((entry.total_fine_kg * entry.spot_price_usd).toFixed(2)),
   }));
 
   return res.json({
@@ -164,7 +164,7 @@ async function getTransactions(req, res) {
        d.deposit_number   AS reference,
        m.code             AS metal_code,
        d.storage_type,
-       d.quantity_oz,
+       d.quantity_kg,
        d.deposited_at     AS event_at
      FROM deposits d
      JOIN metals m ON m.id = d.metal_id
@@ -178,7 +178,7 @@ async function getTransactions(req, res) {
        NULL               AS reference,
        m.code             AS metal_code,
        w.storage_type,
-       w.quantity_oz,
+       w.quantity_kg,
        w.withdrawn_at     AS event_at
      FROM withdrawals w
      JOIN metals m ON m.id = w.metal_id

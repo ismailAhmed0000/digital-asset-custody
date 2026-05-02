@@ -1,5 +1,5 @@
 const db = require('../db/index');
-const { toDbType, toApiType, apiTypeCaseSql } = require('../lib/customerTypeMap');
+const { apiTypeCaseSql } = require('../lib/customerTypeMap');
 
 async function getAllCustomers(req ,res) {
     const result = await db.query(
@@ -18,19 +18,14 @@ async function createCustomer(req, res){
     if (type !== 'retail' && type !== 'institutional') {
         return res.status(400).json({ error: 'Invalid customer type' });
     }
-    const dbType = toDbType(type);
-    if (!dbType) {
-        return res.status(400).json({ error: 'Invalid customer type' });
-    }
     const result = await db.query(
         `INSERT INTO customers (name, email, type)
          VALUES ($1, $2, $3)
          RETURNING id, name AS full_name, email, type, created_at`,
-        [full_name, email, dbType]
+        [full_name, email, type]
     );
-    const row = result.rows[0];
     res.status(201).json({
-        customer: { ...row, type: toApiType(row.type) },
+        customer: result.rows[0],
     });
 }
 

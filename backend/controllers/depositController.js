@@ -9,11 +9,10 @@ function generateDepositNumber() {
 }
 
 async function createDeposit(req, res) {
-  const { customer_id, metal_id, storage_type, quantity_oz, serial_number, vault_id } = req.body;
+  const { customer_id, metal_id, storage_type, quantity_kg, serial_number, vault_id } = req.body;
 
-
-  if (!quantity_oz || Number(quantity_oz) <= 0) {
-    return res.status(422).json({ error: 'quantity_oz must be greater than 0' });
+  if (!quantity_kg || Number(quantity_kg) <= 0) {
+    return res.status(422).json({ error: 'quantity_kg must be greater than 0' });
   }
 
 
@@ -56,37 +55,35 @@ async function createDeposit(req, res) {
 
 
     const barResult = await db.query(
-      `INSERT INTO bars (serial_number, metal_id, vault_id, gross_weight_oz, fine_weight_oz, purity, status)
+      `INSERT INTO bars (serial_number, metal_id, vault_id, gross_weight_kg, fine_weight_kg, purity, status)
        VALUES ($1, $2, $3, $4, $4, 1.0000, 'active')
        RETURNING id`,
-      [serial_number, metal_id, vault_id || null, quantity_oz]
+      [serial_number, metal_id, vault_id || null, quantity_kg]
     );
     const bar_id = barResult.rows[0].id;
 
-   
     const depositResult = await db.query(
-      `INSERT INTO deposits (customer_id, metal_id, vault_id, storage_type, quantity_oz, deposit_number)
+      `INSERT INTO deposits (customer_id, metal_id, vault_id, storage_type, quantity_kg, deposit_number)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [customer_id, metal_id, vault_id || null, storage_type, quantity_oz, deposit_number]
+      [customer_id, metal_id, vault_id || null, storage_type, quantity_kg, deposit_number]
     );
     const deposit = depositResult.rows[0];
 
-   
     await db.query(
-      `INSERT INTO bar_allocations (deposit_id, bar_id, allocated_weight_oz)
+      `INSERT INTO bar_allocations (deposit_id, bar_id, allocated_weight_kg)
        VALUES ($1, $2, $3)`,
-      [deposit.id, bar_id, quantity_oz]
+      [deposit.id, bar_id, quantity_kg]
     );
 
     return res.status(201).json({ deposit, bar_id });
   }
 
   const depositResult = await db.query(
-    `INSERT INTO deposits (customer_id, metal_id, vault_id, storage_type, quantity_oz, deposit_number)
+    `INSERT INTO deposits (customer_id, metal_id, vault_id, storage_type, quantity_kg, deposit_number)
      VALUES ($1, $2, $3, $4, $5, $6)
      RETURNING *`,
-    [customer_id, metal_id, vault_id || null, storage_type, quantity_oz, deposit_number]
+    [customer_id, metal_id, vault_id || null, storage_type, quantity_kg, deposit_number]
   );
 
   return res.status(201).json({ deposit: depositResult.rows[0] });

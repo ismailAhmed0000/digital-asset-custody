@@ -70,7 +70,7 @@ export default function CustomerDetail() {
                   <div key={h.metal_id} className="bg-white border border-slate-200 rounded-xl p-4 flex justify-between items-center">
                     <div>
                       <p className="text-slate-900 font-semibold">{h.metal_code}</p>
-                      <p className="text-slate-600 text-sm">{h.net_oz} oz · Pool share: {h.pool_percentage}</p>
+                      <p className="text-slate-600 text-sm">{h.net_kg} kg · Pool share: {h.pool_percentage}</p>
                     </div>
                     <p className="text-emerald-400 font-mono font-bold text-lg">
                       ${h.usd_value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
@@ -88,7 +88,7 @@ export default function CustomerDetail() {
               {port.allocated.map(h => (
                 <div key={h.metal_id} className="bg-white border border-slate-200 rounded-xl p-4 mb-3">
                   <div className="flex justify-between mb-3">
-                    <p className="text-slate-900 font-semibold">{h.metal_code} — {h.total_fine_oz} oz total</p>
+                    <p className="text-slate-900 font-semibold">{h.metal_code} — {h.total_fine_kg} kg total</p>
                     <p className="text-emerald-400 font-mono font-bold">
                       ${h.usd_value.toLocaleString('en-US', { minimumFractionDigits: 2 })}
                     </p>
@@ -97,7 +97,7 @@ export default function CustomerDetail() {
                     <thead>
                       <tr className="border-b border-slate-200">
                         <th className="text-left pb-1">Serial</th>
-                        <th className="text-right pb-1">Fine oz</th>
+                        <th className="text-right pb-1">Fine kg</th>
                         <th className="text-right pb-1">Purity</th>
                         <th className="text-right pb-1">Status</th>
                       </tr>
@@ -106,7 +106,7 @@ export default function CustomerDetail() {
                       {h.bars.map(b => (
                         <tr key={b.bar_id} className="border-t border-slate-100">
                           <td className="py-1 font-mono text-slate-700">{b.serial_number}</td>
-                          <td className="py-1 text-right">{b.fine_weight_oz}</td>
+                          <td className="py-1 text-right">{b.fine_weight_kg}</td>
                           <td className="py-1 text-right">{(b.purity * 100).toFixed(2)}%</td>
                           <td className="py-1 text-right">
                             <span className="text-emerald-400">{b.status}</span>
@@ -135,7 +135,7 @@ export default function CustomerDetail() {
               <th className="text-left px-4 py-3">Reference</th>
               <th className="text-left px-4 py-3">Metal</th>
               <th className="text-left px-4 py-3">Storage</th>
-              <th className="text-right px-4 py-3">Qty (oz)</th>
+              <th className="text-right px-4 py-3">Qty (kg)</th>
               <th className="text-right px-4 py-3">Date</th>
             </tr>
           </thead>
@@ -150,7 +150,7 @@ export default function CustomerDetail() {
                 <td className="px-4 py-3 text-slate-400 font-mono text-xs">{tx.reference ?? '—'}</td>
                 <td className="px-4 py-3 text-slate-700">{tx.metal_code}</td>
                 <td className="px-4 py-3 text-slate-600 capitalize">{tx.storage_type}</td>
-                <td className="px-4 py-3 text-right font-mono text-slate-800">{tx.quantity_oz}</td>
+                <td className="px-4 py-3 text-right font-mono text-slate-800">{tx.quantity_kg}</td>
                 <td className="px-4 py-3 text-right text-slate-500 text-xs">
                   {new Date(tx.event_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                 </td>

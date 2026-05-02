@@ -39,7 +39,7 @@ export default function Dashboard() {
           <thead className="bg-slate-50 text-slate-600">
             <tr>
               <th className="text-left px-4 py-3">Metal</th>
-              <th className="text-right px-4 py-3">Spot Price (USD/oz)</th>
+              <th className="text-right px-4 py-3">Spot Price (USD/kg)</th>
             </tr>
           </thead>
           <tbody>

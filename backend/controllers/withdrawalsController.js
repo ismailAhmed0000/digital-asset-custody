@@ -1,11 +1,10 @@
 const db = require('../db/index');
 
 async function createWithdrawal(req, res) {
-  const { customer_id, metal_id, storage_type, quantity_oz, bar_id } = req.body;
+  const { customer_id, metal_id, storage_type, quantity_kg, bar_id } = req.body;
 
-  
-  if (!quantity_oz || Number(quantity_oz) <= 0) {
-    return res.status(422).json({ error: 'quantity_oz must be greater than 0' });
+  if (!quantity_kg || Number(quantity_kg) <= 0) {
+    return res.status(422).json({ error: 'quantity_kg must be greater than 0' });
   }
 
   if (!customer_id || !metal_id || !storage_type) {
@@ -58,10 +57,10 @@ async function createWithdrawal(req, res) {
 
 
     const result = await db.query(
-      `INSERT INTO withdrawals (customer_id, metal_id, bar_id, storage_type, quantity_oz)
+      `INSERT INTO withdrawals (customer_id, metal_id, bar_id, storage_type, quantity_kg)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [customer_id, metal_id, bar_id, storage_type, quantity_oz]
+      [customer_id, metal_id, bar_id, storage_type, quantity_kg]
     );
 
     return res.status(201).json({ withdrawal: result.rows[0] });
@@ -70,9 +69,9 @@ async function createWithdrawal(req, res) {
 
   const balanceResult = await db.query(
     `SELECT
-       COALESCE(SUM(d.quantity_oz), 0) AS total_deposited,
+       COALESCE(SUM(d.quantity_kg), 0) AS total_deposited,
        COALESCE((
-         SELECT SUM(w.quantity_oz)
+         SELECT SUM(w.quantity_kg)
          FROM withdrawals w
          WHERE w.customer_id = $1
            AND w.metal_id = $2
@@ -88,20 +87,19 @@ async function createWithdrawal(req, res) {
   const { total_deposited, total_withdrawn } = balanceResult.rows[0];
   const available = parseFloat(total_deposited) - parseFloat(total_withdrawn);
 
-
-  if (Number(quantity_oz) > available) {
+  if (Number(quantity_kg) > available) {
     return res.status(400).json({
       error: 'Insufficient balance',
-      available_oz: available,
-      requested_oz: Number(quantity_oz),
+      available_kg: available,
+      requested_kg: Number(quantity_kg),
     });
   }
 
   const result = await db.query(
-    `INSERT INTO withdrawals (customer_id, metal_id, storage_type, quantity_oz)
+    `INSERT INTO withdrawals (customer_id, metal_id, storage_type, quantity_kg)
      VALUES ($1, $2, $3, $4)
      RETURNING *`,
-    [customer_id, metal_id, storage_type, quantity_oz]
+    [customer_id, metal_id, storage_type, quantity_kg]
   );
 
   return res.status(201).json({ withdrawal: result.rows[0] });

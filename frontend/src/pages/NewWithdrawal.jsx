@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 
-const EMPTY = { customer_id: '', metal_id: '', storage_type: 'unallocated', quantity_oz: '', bar_id: '' };
+const EMPTY = { customer_id: '', metal_id: '', storage_type: 'unallocated', quantity_kg: '', bar_id: '' };
 
 export default function NewWithdrawal() {
   const [form, setForm]       = useState(EMPTY);
@@ -35,7 +35,7 @@ export default function NewWithdrawal() {
         const holding = res.data.portfolio.unallocated.find(
           h => String(h.metal_id) === String(metal_id)
         );
-        setBalance(holding ? holding.net_oz : 0);
+        setBalance(holding ? holding.net_kg : 0);
       })
       .catch(() => setBalance(null));
   }, [form.customer_id, form.metal_id, form.storage_type]);
@@ -50,7 +50,7 @@ export default function NewWithdrawal() {
         ...form,
         customer_id: Number(form.customer_id),
         metal_id:    Number(form.metal_id),
-        quantity_oz: Number(form.quantity_oz),
+        quantity_kg: Number(form.quantity_kg),
         bar_id:      form.storage_type === 'allocated' && form.bar_id ? Number(form.bar_id) : undefined,
       });
       setSuccess('Withdrawal recorded successfully.');
@@ -88,7 +88,7 @@ export default function NewWithdrawal() {
         {form.storage_type === 'unallocated' && balance !== null && (
           <div className="text-sm bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 flex justify-between">
             <span className="text-slate-600">Available balance</span>
-            <span className="text-emerald-400 font-mono font-semibold">{balance} oz</span>
+            <span className="text-emerald-400 font-mono font-semibold">{balance} kg</span>
           </div>
         )}
 
@@ -101,8 +101,8 @@ export default function NewWithdrawal() {
         )}
 
         <div>
-          <label className="block text-slate-500 text-xs uppercase tracking-widest mb-1">Quantity (oz)</label>
-          <input type="number" name="quantity_oz" value={form.quantity_oz} onChange={handleChange} min="0.000001" step="any" required className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 text-sm" />
+          <label className="block text-slate-500 text-xs uppercase tracking-widest mb-1">Quantity (kg)</label>
+          <input type="number" name="quantity_kg" value={form.quantity_kg} onChange={handleChange} min="0.000001" step="any" required className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-slate-900 text-sm" />
         </div>
 
         <button type="submit" className="bg-red-600 hover:bg-red-500 text-white font-semibold text-sm px-4 py-2 rounded-lg w-full transition-colors">

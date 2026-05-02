@@ -21,7 +21,7 @@ export default function MetalPriceStrip() {
           <span className="text-emerald-400 font-mono font-semibold">
             ${parseFloat(m.spot_price_usd).toLocaleString('en-US', { minimumFractionDigits: 2 })}
           </span>
-          <span className="text-slate-500 text-xs">/ oz</span>
+          <span className="text-slate-500 text-xs">/ kg</span>
         </div>
       ))}
     </div>

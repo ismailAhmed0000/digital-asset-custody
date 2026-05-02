@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import client from '../api/client';
 
-const EMPTY = { customer_id: '', metal_id: '', storage_type: 'unallocated', quantity_oz: '', serial_number: '', vault_id: '' };
+const EMPTY = { customer_id: '', metal_id: '', storage_type: 'unallocated', quantity_kg: '', serial_number: '', vault_id: '' };
 
 export default function NewDeposit() {
   const [form, setForm]       = useState(EMPTY);
@@ -33,7 +33,7 @@ export default function NewDeposit() {
         ...form,
         customer_id: Number(form.customer_id),
         metal_id:    Number(form.metal_id),
-        quantity_oz: Number(form.quantity_oz),
+        quantity_kg: Number(form.quantity_kg),
         vault_id:    form.vault_id ? Number(form.vault_id) : undefined,
         serial_number: form.storage_type === 'allocated' ? form.serial_number : undefined,
       });
@@ -61,7 +61,7 @@ export default function NewDeposit() {
         {/* Metal */}
         <SelectField label="Metal" name="metal_id" value={form.metal_id} onChange={handleChange}>
           <option value="">Select metal...</option>
-          {metals.map(m => <option key={m.id} value={m.id}>{m.name} — ${m.spot_price_usd}/oz</option>)}
+          {metals.map(m => <option key={m.id} value={m.id}>{m.name} — ${m.spot_price_usd}/kg</option>)}
         </SelectField>
 
         {/* Storage type */}
@@ -71,7 +71,7 @@ export default function NewDeposit() {
         </SelectField>
 
         {/* Quantity */}
-        <NumberField label="Quantity (oz)" name="quantity_oz" value={form.quantity_oz} onChange={handleChange} />
+        <NumberField label="Quantity (kg)" name="quantity_kg" value={form.quantity_kg} onChange={handleChange} />
 
         {/* Serial number — only shown for allocated */}
         {form.storage_type === 'allocated' && (
