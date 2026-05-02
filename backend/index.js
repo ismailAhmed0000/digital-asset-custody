@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const metalRoutes = require('./routes/metal');
 const customerRoutes = require('./routes/customer');
-const depositRoutes = require('./routes/desposits');   
+const depositRoutes = require('./routes/deposits');
 const withdrawalRoutes = require('./routes/withdrawals');
 const accountRoutes = require('./routes/accounts');
 

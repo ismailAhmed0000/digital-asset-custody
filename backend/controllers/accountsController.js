@@ -1,5 +1,4 @@
 const db = require('../db/index');
-const { apiTypeCaseSql } = require('../lib/customerTypeMap');
 
 
 async function getPortfolio(req, res) {
@@ -7,7 +6,7 @@ async function getPortfolio(req, res) {
 
   // 404 — customer must exist
   const customerResult = await db.query(
-    `SELECT id, name AS full_name, email, ${apiTypeCaseSql()} FROM customers WHERE id = $1`,
+    `SELECT id, name AS full_name, email, type FROM customers WHERE id = $1`,
     [id]
   );
   if (customerResult.rows.length === 0) {

@@ -1,9 +1,8 @@
 const db = require('../db/index');
-const { apiTypeCaseSql } = require('../lib/customerTypeMap');
 
 async function getAllCustomers(req ,res) {
     const result = await db.query(
-        `SELECT id, name AS full_name, email, ${apiTypeCaseSql()} FROM customers ORDER BY id`
+        `SELECT id, name AS full_name, email, type FROM customers ORDER BY id`
     );
     res.json({customers: result.rows});
     
@@ -32,7 +31,7 @@ async function createCustomer(req, res){
 async function getCustomerAccount(req,res) {
     const {id} =req.params;
     const customerResult = await db.query(
-        `SELECT id, name AS full_name, email, ${apiTypeCaseSql()} FROM customers WHERE id = $1`,
+        `SELECT id, name AS full_name, email, type FROM customers WHERE id = $1`,
         [id]
     );
 
@@ -41,7 +40,7 @@ async function getCustomerAccount(req,res) {
     }
 
     const depositsResult = await db.query(
-        `SELECT d.id, m.code AS metal, d.storage_type, d.quantity_oz, d.deposited_at
+        `SELECT d.id, m.code AS metal, d.storage_type, d.quantity_kg, d.deposited_at
          FROM deposits d
          JOIN metals m ON m.id = d.metal_id
          WHERE d.customer_id = $1
